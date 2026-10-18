@@ -52,6 +52,33 @@ def _sha1(p: Path) -> str:
     return h.hexdigest()
 
 
+def _own_names(files: list[Path]) -> set[str]:
+    """Folder names a loader would install this mod under: Info.json Id (Unity Mod Manager), manifest.json name
+    (Thunderstore), DLL stems (BepInEx plugins). Lower-cased."""
+    import json
+    names = {f.stem.lower() for f in files if f.suffix.lower() == ".dll"}
+    for f in files:
+        if f.name.lower() in ("info.json", "manifest.json"):
+            try:
+                d = json.loads(f.read_text(encoding="utf-8-sig", errors="replace"))
+            except (OSError, ValueError):
+                continue
+            for k in ("Id", "name"):
+                if isinstance(d, dict) and isinstance(d.get(k), str) and d[k].strip():
+                    names.add(d[k].strip().lower())
+    return names
+
+
+def _loader_folder(rel: tuple[str, ...]) -> str | None:
+    """The mod folder name when a game-relative path sits in a loader's mods folder (Mods/<name>/...,
+    BepInEx/plugins/<name>/...), else None."""
+    low = [x.lower() for x in rel]
+    for i in range(len(low) - 2):              # need <name> and a file below it
+        if low[i] == "mods" or (low[i] == "plugins" and i and low[i - 1] == "bepinex"):
+            return low[i + 1]
+    return None
+
+
 def check(mod: str, game: str | None = None) -> int:
     root = Path(to_posix(mod))
     if not root.is_dir():
@@ -73,6 +100,10 @@ def check(mod: str, game: str | None = None) -> int:
                     by_size.setdefault(p.stat().st_size, []).append(p)
                 except OSError:
                     pass
+        # this mod installed into the game (Mods/<Id>/, BepInEx/plugins/<name>/) matches itself: skip that copy
+        own = _own_names(files)
+        for sz, ps in list(by_size.items()):
+            by_size[sz] = [p for p in ps if _loader_folder(p.relative_to(g).parts) not in own]
         for f in files:
             sz = f.stat().st_size
             if sz < 64 or sz not in by_size:

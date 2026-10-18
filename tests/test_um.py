@@ -850,6 +850,24 @@ def test_publish_check_mod_inside_game(tmp_path, capsys):
     assert "copied.bin" in out and "page.png" not in out
 
 
+def test_publish_check_mod_installed_in_loader_folder(tmp_path, capsys):
+    # a UMM mod repo installed to <game>/Mods/<Id>/ (and a BepInEx build in plugins/<dll>/) matched its own copy
+    info = '{"Id": "N7MassEffect", "AssemblyName": "N7MassEffect.dll"}'
+    make(tmp_path / "mod", {"src/N7/Info.json": info + " " * 64, "src/N7/Assets/n7.png": b"i" * 4096,
+                            "src/N7/bin/N7MassEffect.dll": b"d" * 4096, "README.md": "My mod"})
+    make(tmp_path / "game", {"Data/big.bin": b"x" * 4096, "Mods/N7MassEffect/Info.json": info + " " * 64,
+                             "Mods/N7MassEffect/Assets/n7.png": b"i" * 4096,
+                             "BepInEx/plugins/N7MassEffect/N7MassEffect.dll": b"d" * 4096,
+                             "Mods/SomeoneElse/theirs.bin": b"z" * 4096})
+    assert publish.check(str(tmp_path / "mod"), str(tmp_path / "game")) == 0
+    # genuine game files still fail, including another mod's files under Mods/
+    (tmp_path / "mod" / "copied.bin").write_bytes(b"x" * 4096)
+    (tmp_path / "mod" / "theirs.bin").write_bytes(b"z" * 4096)
+    assert publish.check(str(tmp_path / "mod"), str(tmp_path / "game")) == 1
+    out = capsys.readouterr().out.replace("\\", "/")
+    assert "copied.bin" in out and "Mods/SomeoneElse/theirs.bin" in out and "n7.png" not in out and "N7MassEffect.dll" not in out
+
+
 @pytest.mark.parametrize("label,key", [
     # assembled at runtime so this file doesn't trip the toolkit's own publish check
     ("OpenAI key", "sk-" + "proj-" + "Ab3_dE-f" + "Gh1jK2lM3nO4pQ5rS6tU7vW8xY9z0" * 4),

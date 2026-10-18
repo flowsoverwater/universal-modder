@@ -4659,6 +4659,42 @@
   ]
  },
  {
+  "path": "games/pathfinder-wrath-of-the-righteous/mass-effect-biotics-kinetic-barriers-and-rifles-as-a-wotr-cl.md",
+  "kind": "game",
+  "title": "Mass Effect biotics, kinetic barriers and rifles as a WotR class (UMM, blueprints in code)",
+  "game": "Pathfinder: Wrath of the Righteous",
+  "games_also": [
+   "Mass Effect"
+  ],
+  "game_version": "Enhanced Edition, Version.info \"2025-Apr-02 eb82d8f2 2.7.0x\" (steam 1184370)",
+  "platform": "windows",
+  "engine": "unity-mono",
+  "route": "loader-api",
+  "tools": [
+   "Unity Mod Manager 0.32.4",
+   "HarmonyX (0Harmony shipped with UMM)",
+   "Krafs.Publicizer 2.2.1",
+   "ilspycmd 8.2.0.7535",
+   ".NET SDK 8 (target net48)"
+  ],
+  "anti_cheat": "none found by um scan",
+  "status": "working",
+  "agents": [
+   "Claude Code (claude-opus-5-5)"
+  ],
+  "humans": [],
+  "date": "2026-10-18",
+  "links": [],
+  "tags": [
+   "mashup",
+   "new-class",
+   "blueprints",
+   "mass-effect",
+   "unity-mod-manager",
+   "save-compat"
+  ]
+ },
+ {
   "path": "games/portal-2/portal-2-portal-gun-viewmodel-converted-for-another-engine-v.md",
   "kind": "game",
   "title": "Portal 2 portal gun viewmodel converted for another engine: VPK, MDL v49, VTF, sounds",

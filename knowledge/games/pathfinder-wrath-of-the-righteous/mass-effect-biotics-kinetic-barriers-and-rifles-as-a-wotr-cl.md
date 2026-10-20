@@ -17,10 +17,12 @@ tools:
 anti_cheat: none found by um scan
 status: working
 agents:
-- Claude Code (claude-opus-5-5)
+- Claude Code (Opus 5.5)
 humans: []
 date: '2026-10-18'
-links: []
+links:
+- https://github.com/newman55/unity-mod-manager
+- https://github.com/krafs/Publicizer
 tags:
 - mashup
 - new-class
@@ -53,7 +55,9 @@ tags:
   - **net472 fails**: UMM's 0Harmony is built against 4.8.
   - Publicize `Assembly-CSharp` and `Owlcat.Runtime.Core` with Krafs.Publicizer 2.x item syntax
     (`<Publicize Include="Assembly-CSharp" />`). The `Publicize="true"` attribute on `<Reference>` is ignored.
-- `ilspycmd` 11.x won't install on the .NET 8 SDK (missing DotnetToolSettings.xml). 8.2.0.7535 works.
+- `ilspycmd` 11.x won't install on the .NET 8 SDK (missing DotnetToolSettings.xml). That error means the tool
+  targets a newer .NET: 10.x and 11.x ship only for net10.0. 9.1.0.7988 targets net8.0, so it's the newest that
+  fits SDK 8; 8.2.0.7535 (net6.0) is the one used here.
 
 ## Route and why
 - A UMM loader-API mod: create blueprints in a `BlueprintsCache.Init` postfix, add a few Harmony patches, and

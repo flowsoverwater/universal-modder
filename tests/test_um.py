@@ -866,6 +866,28 @@ def test_publish_check_mod_installed_in_loader_folder(tmp_path, capsys):
     assert publish.check(str(tmp_path / "mod"), str(tmp_path / "game")) == 1
     out = capsys.readouterr().out.replace("\\", "/")
     assert "copied.bin" in out and "Mods/SomeoneElse/theirs.bin" in out and "n7.png" not in out and "N7MassEffect.dll" not in out
+    assert "not compared, this mod's own installed copy: BepInEx/plugins/N7MassEffect/, Mods/N7MassEffect/" in out
+
+
+def test_publish_check_own_installed_copy_is_named_by_metadata_only(tmp_path, capsys):
+    # only the mod's own metadata names its installed folder; a DLL it merely bundles doesn't
+    csproj = "<Project><PropertyGroup><AssemblyName>N7</AssemblyName></PropertyGroup></Project>"
+    make(tmp_path / "mod", {"README.md": "My mod", "src/N7Plugin.csproj": csproj, "bin/N7.dll": b"n" * 4096,
+                            "lib/ModMenu.dll": b"m" * 4096, "lib/Foo.dll": b"f" * 4096,
+                            "lib/Assembly-CSharp.dll": b"g" * 4096})
+    make(tmp_path / "game", {"BepInEx/plugins/N7.dll": b"n" * 4096,         # this mod, flat in plugins/
+                             "BepInEx/plugins/N7/N7.dll": b"n" * 4096,      # this mod, in its own folder
+                             "Mods/ModMenu/ModMenu.dll": b"m" * 4096,       # another mod it references
+                             "Mods/Foo/Foo.dll": b"f" * 4096,               # a folder the game ships under Mods/
+                             "Game_Data/Managed/Assembly-CSharp.dll": b"g" * 4096,
+                             "BepInEx/plugins/N7/Assembly-CSharp.dll": b"g" * 4096})   # copied in by the build
+    assert publish.check(str(tmp_path / "mod"), str(tmp_path / "game")) == 1
+    out = capsys.readouterr().out.replace("\\", "/")
+    fails = [ln for ln in out.splitlines() if ln.startswith("FAIL ")]
+    assert len(fails) == 3 and not any("bin/N7.dll" in ln for ln in fails)
+    assert "lib/ModMenu.dll  (== Mods/ModMenu/ModMenu.dll)" in out and "lib/Foo.dll  (== Mods/Foo/Foo.dll)" in out
+    assert "lib/Assembly-CSharp.dll  (== Game_Data/Managed/Assembly-CSharp.dll)" in out
+    assert publish._own_names([tmp_path / "mod" / "src/N7Plugin.csproj"]) == {"n7"}
 
 
 @pytest.mark.parametrize("label,key", [

@@ -4899,11 +4899,14 @@
   "anti_cheat": "none found by um scan",
   "status": "working",
   "agents": [
-   "Claude Code (claude-opus-5-5)"
+   "Claude Code (Opus 5.5)"
   ],
   "humans": [],
   "date": "2026-10-18",
-  "links": [],
+  "links": [
+   "https://github.com/newman55/unity-mod-manager",
+   "https://github.com/krafs/Publicizer"
+  ],
   "tags": [
    "mashup",
    "new-class",
